@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link type="text/css" rel="stylesheet" href="/static/main.css" />
+
+    <title>CS 253 Blog</title>
+</head>
+
+<body>
+<a href="/blog" class="main-title">
+    My blog!
+</a>
+
+<div id="content">
+
+    <h2>new post</h2>
+
+    <form method="post">
+        <label>
+            <div>Subject</div>
+            <input type="text" name="subject" value="{{subject}}">
+        </label>
+
+        <label>
+            <div>Post</div>
+            <textarea name="content">{{content}}</textarea>
+        </label>
+
+        <div class="error">{{error}}</div>
+
+        <input type="submit">
+    </form>
+
+</div>
+</body>
+
+</html>

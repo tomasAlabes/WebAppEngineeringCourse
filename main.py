@@ -15,9 +15,12 @@
 # limitations under the License.
 #
 import webapp2
-from riot import RiotHandler
-from signup import SignUpHandler
-from signup import WelcomeUpHandler
+from HomeWork2.riot import RiotHandler
+from HomeWork2.signup import SignUpHandler
+from HomeWork2.signup import WelcomeHandler
+from HomeWork3.blog import BlogHandler
+from HomeWork3.blog import NewPostHandler
+from HomeWork3.blog import PostHandler
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -26,5 +29,8 @@ class MainHandler(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([('/', MainHandler),
                                 ('/rot13', RiotHandler),
                                 ('/signup', SignUpHandler),
-                                ('/welcome', WelcomeUpHandler)],
-                              debug=True)
+                                ('/welcome', WelcomeHandler),
+                                ('/blog', BlogHandler),
+                                ('/blog/newpost', NewPostHandler),
+                                ('/blog/(\d+)', PostHandler)],
+                                debug=True)

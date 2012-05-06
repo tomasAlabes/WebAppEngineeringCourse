@@ -134,7 +134,7 @@ welcomeHtml = """
 </html>
 """
 
-class WelcomeUpHandler(webapp2.RequestHandler):
+class WelcomeHandler(webapp2.RequestHandler):
     def get(self):
         username = self.request.get('username')
         self.response.out.write(welcomeHtml % {'username' : username})
