@@ -27,7 +27,7 @@ html = """
           <td>
             <input type="text" name="username" value="%(username)s">
           </td>
-          <td class="error">
+          <td class="error">%(err_user)s
 
           </td>
         </tr>
@@ -40,7 +40,7 @@ html = """
             <input type="password" name="password" value="%(password)s">
           </td>
           <td class="error">
-
+            %(err_passw1)s
           </td>
         </tr>
 
@@ -52,7 +52,7 @@ html = """
             <input type="password" name="verify" value="%(verify)s">
           </td>
           <td class="error">
-
+            %(err_passw2)s
           </td>
         </tr>
 
@@ -64,7 +64,7 @@ html = """
             <input type="text" name="email" value="%(email)s">
           </td>
           <td class="error">
-
+            %(err_email)s
           </td>
         </tr>
       </table>
@@ -81,33 +81,38 @@ PASSWORD_RE = re.compile('^.{3,20}$')
 EMAIL_RE = re.compile('^[\S]+@[\S]+\.[\S]+$')
 
 class SignUpHandler(webapp2.RequestHandler):
+    def write_form(self, username="", email="", err_user="", err_passw1="", err_passw2="", err_email=""):
+        self.response.out.write(html %{"username": username, "password": "", "verify": "", "email": email, "err_user":err_user, "err_passw1":err_passw1, "err_passw2":err_passw2, "err_email":err_email })
+
     def get(self):
-        self.response.out.write(html)
-        #% {'usernameError': '',
-           #'passwordError':'',
-           #'emailError':''}
+       self.write_form()
+
     def post(self):
         username = self.request.get('username')
         password = self.request.get('password')
         verify = self.request.get('verify')
         email = self.request.get('email')
-        is_valid_username = valid_username(username)
-        is_valid_password = valid_password(password)
-        is_valid_email = valid_email(email)
-        if is_valid_username and is_valid_password and (is_valid_email or email == ''):
-            if password == verify:
-                self.redirect('/welcome?username='+username)
-        else:
-            #values = {'username': username, 'email': email}
-            #errorMsg = 'Thats not a valid '
-            #if not is_valid_username:
-            #    values['usernameError'] = (errorMsg + 'username')
-            #elif not is_valid_password:
-            #    values['passwordError'] = (errorMsg + 'password')
-            #else:
-            #    values['emailError'] = (errorMsg + 'email')
 
-            self.response.out.write(html % {"username": username, "email": email})
+        err_user = ""
+        if not USER_RE.match(username):
+            err_user = "That's not a valid username."
+
+        err_passw1 = ""
+        err_passw2 = ""
+        if len(password)==0 or not PASSWORD_RE.match(password):
+            err_passw1 = "Type a password"
+        elif password != verify:
+            err_passw2 = "Your passwords didn't match."
+
+        err_email = ""
+        if len(email) != 0 and not EMAIL_RE.match(email):
+            err_email = "That's not a valid email address"
+
+        if err_user or err_passw1 or err_passw2 or err_email:
+            self.write_form(username = username, email = email, err_user = err_user, err_passw1 = err_passw1,
+                err_passw2 = err_passw2, err_email = err_email)
+        else:
+            self.redirect("/welcome?username=%s" % username)
 
 def valid_username(username):
     return USER_RE.match(username)
