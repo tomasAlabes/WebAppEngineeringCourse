@@ -1,91 +1,19 @@
 __author__ = 'Tomi'
 
-import webapp2
 import re
-
-html = """
-<!DOCTYPE html>
-
-<html>
-  <head>
-    <title>Sign Up</title>
-    <style type="text/css">
-      .label {text-align: right}
-      .error {color: red}
-    </style>
-
-  </head>
-
-  <body>
-    <h2>Signup</h2>
-    <form method="post">
-      <table>
-        <tr>
-          <td class="label">
-            Username
-          </td>
-          <td>
-            <input type="text" name="username" value="%(username)s">
-          </td>
-          <td class="error">%(err_user)s
-
-          </td>
-        </tr>
-
-        <tr>
-          <td class="label">
-            Password
-          </td>
-          <td>
-            <input type="password" name="password" value="%(password)s">
-          </td>
-          <td class="error">
-            %(err_passw1)s
-          </td>
-        </tr>
-
-        <tr>
-          <td class="label">
-            Verify Password
-          </td>
-          <td>
-            <input type="password" name="verify" value="%(verify)s">
-          </td>
-          <td class="error">
-            %(err_passw2)s
-          </td>
-        </tr>
-
-        <tr>
-          <td class="label">
-            Email (optional)
-          </td>
-          <td>
-            <input type="text" name="email" value="%(email)s">
-          </td>
-          <td class="error">
-            %(err_email)s
-          </td>
-        </tr>
-      </table>
-
-      <input type="submit">
-    </form>
-  </body>
-
-</html>
-"""
+from templateHandler import TemplateHandler
+from HomeWork4.userModel import User
+from HomeWork4.hashes import HashManager
 
 USER_RE = re.compile(r'^[a-zA-Z0-9_-]{3,20}$')
 PASSWORD_RE = re.compile('^.{3,20}$')
 EMAIL_RE = re.compile('^[\S]+@[\S]+\.[\S]+$')
 
-class SignUpHandler(webapp2.RequestHandler):
-    def write_form(self, username="", email="", err_user="", err_passw1="", err_passw2="", err_email=""):
-        self.response.out.write(html %{"username": username, "password": "", "verify": "", "email": email, "err_user":err_user, "err_passw1":err_passw1, "err_passw2":err_passw2, "err_email":err_email })
+hashManager = HashManager()
 
+class SignUpHandler(TemplateHandler):
     def get(self):
-       self.write_form()
+        self.render("signUp.html")
 
     def post(self):
         username = self.request.get('username')
@@ -109,10 +37,18 @@ class SignUpHandler(webapp2.RequestHandler):
             err_email = "That's not a valid email address"
 
         if err_user or err_passw1 or err_passw2 or err_email:
-            self.write_form(username = username, email = email, err_user = err_user, err_passw1 = err_passw1,
+            self.render("signUp.html", username = username, email = email, err_user = err_user, err_passw1 = err_passw1,
                 err_passw2 = err_passw2, err_email = err_email)
         else:
-            self.redirect("/welcome?username=%s" % username)
+            password_hash = hashManager.makePasswordHash(username, password)
+            if email:
+                newUser = User(name = username, password_hash = password_hash, email = email)
+            else:
+                newUser = User(name = username, password_hash = password_hash)
+            newUserKey = newUser.put()
+            newUserId = str(newUserKey.id())
+            self.response.headers.add_header('Set-Cookie', 'user_id=%s; Path=/' % hashManager.makeStringHash(newUserId))
+            self.redirect("/welcome")
 
 def valid_username(username):
     return USER_RE.match(username)
@@ -123,24 +59,17 @@ def valid_email(email):
 def valid_password(password):
     return PASSWORD_RE.match(password)
 
+COOKIE_RE = re.compile(r'.+=; Path=/')
+def valid_cookie(cookie):
+    return cookie and COOKIE_RE.match(cookie)
 
-welcomeHtml = """
-<!DOCTYPE html>
-
-<html>
-  <head>
-    <title>Welcome!</title>
-  </head>
-  <body>
-    <h2> Welcome %(username)s !</h2>
-
-  </body>
-
-</html>
-"""
-
-class WelcomeHandler(webapp2.RequestHandler):
+class WelcomeHandler(TemplateHandler):
     def get(self):
-        username = self.request.get('username')
-        self.response.out.write(welcomeHtml % {'username' : username})
+        idHash = self.request.cookies.get("user_id")
+        if not valid_cookie(idHash) or hashManager.validStringHash(idHash):
+            validId = int(idHash.split('|')[0])
+            username = (User.get_by_id(validId))
+            self.render("welcome.html", username= str(username.name))
+        else:
+            self.redirect("/signup")
 

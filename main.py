@@ -21,6 +21,8 @@ from HomeWork2.signup import WelcomeHandler
 from HomeWork3.blog import BlogHandler
 from HomeWork3.blog import NewPostHandler
 from HomeWork3.blog import PostHandler
+from HomeWork4.login import LoginHandler
+from HomeWork4.login import LogoutHandler
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -32,5 +34,7 @@ app = webapp2.WSGIApplication([('/', MainHandler),
                                 ('/welcome', WelcomeHandler),
                                 ('/blog', BlogHandler),
                                 ('/blog/newpost', NewPostHandler),
-                                ('/blog/(\d+)', PostHandler)],
+                                ('/blog/(\d+)', PostHandler),
+                                ('/login', LoginHandler),
+                                ('/logout', LogoutHandler)],
                                 debug=True)
