@@ -48,7 +48,7 @@ class SignUpHandler(TemplateHandler):
             newUserKey = newUser.put()
             newUserId = str(newUserKey.id())
             self.response.headers.add_header('Set-Cookie', 'user_id=%s; Path=/' % hashManager.makeStringHash(newUserId))
-            self.redirect("/welcome")
+            self.redirect("/blog/welcome")
 
 def valid_username(username):
     return USER_RE.match(username)
@@ -71,5 +71,5 @@ class WelcomeHandler(TemplateHandler):
             username = (User.get_by_id(validId))
             self.render("welcome.html", username= str(username.name))
         else:
-            self.redirect("/signup")
+            self.redirect("/blog/signup")
 

@@ -23,6 +23,8 @@ from HomeWork3.blog import NewPostHandler
 from HomeWork3.blog import PostHandler
 from HomeWork4.login import LoginHandler
 from HomeWork4.login import LogoutHandler
+from HomeWork5.jsonAPI import JsonPostHandler
+from HomeWork5.jsonAPI import PostJsonHandler
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -30,11 +32,13 @@ class MainHandler(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([('/', MainHandler),
                                 ('/rot13', RiotHandler),
-                                ('/signup', SignUpHandler),
-                                ('/welcome', WelcomeHandler),
+                                ('/blog/signup', SignUpHandler),
+                                ('/blog/welcome', WelcomeHandler),
                                 ('/blog', BlogHandler),
                                 ('/blog/newpost', NewPostHandler),
                                 ('/blog/(\d+)', PostHandler),
-                                ('/login', LoginHandler),
-                                ('/logout', LogoutHandler)],
+                                ('/blog/login', LoginHandler),
+                                ('/blog/logout', LogoutHandler),
+                                ('/blog/.json', JsonPostHandler),
+                                ('/blog/(\d+).json', PostJsonHandler)],
                                 debug=True)

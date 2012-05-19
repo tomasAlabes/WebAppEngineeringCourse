@@ -15,7 +15,7 @@ class LoginHandler(TemplateHandler):
 
         db_password_hash = self.getDBPasswordHash(username)
         if db_password_hash and hashManager.validPassword(username, password, db_password_hash):
-            self.redirect("/welcome")
+            self.redirect("/blog/welcome")
         else:
             self.render("login.html", error= "Wrong User/Password")
 
@@ -29,4 +29,4 @@ class LoginHandler(TemplateHandler):
 class LogoutHandler(TemplateHandler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
-        self.redirect("/signup")
+        self.redirect("/blog/signup")
