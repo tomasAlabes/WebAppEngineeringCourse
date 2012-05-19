@@ -1,7 +1,11 @@
 __author__ = 'Tomi'
 
+from HomeWork4.login import empty_cookie
+from HomeWork4.hashes import HashManager
 from templateHandler import TemplateHandler
 from google.appengine.ext import db
+
+hashManager = HashManager()
 
 class Post(db.Model):
     subject = db.StringProperty(required= True)
@@ -16,7 +20,12 @@ class BlogHandler(TemplateHandler):
 
 class NewPostHandler(TemplateHandler):
     def get(self):
-        self.render("newPost.html")
+        idHash = self.request.cookies.get("user_id")
+        if empty_cookie(idHash) and hashManager.validStringHash(idHash):
+            self.render("newPost.html")
+        else:
+            self.redirect("/blog/signup")
+
     def post(self):
         subject = self.request.get('subject')
         content = self.request.get('content')

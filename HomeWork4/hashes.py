@@ -16,7 +16,6 @@ class HashManager():
         return '%s,%s' % (h, salt)
 
     def validPassword(self, name, password, h):
-        print h
         salt = h.split(',')[1]
         return h == self.makePasswordHash(name, password, salt)
 
@@ -32,4 +31,3 @@ class HashManager():
         hashVal = hash_split[1]
         if hashVal == self.hashString(val):
             return val
-
