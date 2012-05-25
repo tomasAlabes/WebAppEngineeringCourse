@@ -1,9 +1,5 @@
 from HomeWork3.blog import Post
-
-__author__ = 'Tomi'
-
 from templateHandler import TemplateHandler
-from google.appengine.ext import db
 import json
 
 #[{"content": "again", "subject": "the suit is back!"}, {"content": "hurray!", "subject": "a new post!"}, {"content": "H", "subject": "Huzzah!"}]
@@ -11,10 +7,9 @@ import json
 class JsonPostHandler(TemplateHandler):
     def get(self):
         self.response.headers['Content-Type'] = "application/json; charset=UTF-8"
-        posts = db.GqlQuery("SELECT * FROM Post ORDER BY date DESC LIMIT 10")
-        postsList = list(posts)
+        posts = Post.all().order('-created')
         jsonList = []
-        for post in postsList:
+        for post in posts:
             jsonList.append({"content": post.content, "subject": post.subject})
         self.response.out.write(json.dumps(jsonList))
 

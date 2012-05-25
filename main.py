@@ -25,6 +25,7 @@ from HomeWork4.login import LoginHandler
 from HomeWork4.login import LogoutHandler
 from HomeWork5.jsonAPI import JsonPostHandler
 from HomeWork5.jsonAPI import PostJsonHandler
+from HomeWork6.flush import FlushCacheHandler
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -40,5 +41,6 @@ app = webapp2.WSGIApplication([('/', MainHandler),
                                 ('/blog/login', LoginHandler),
                                 ('/blog/logout', LogoutHandler),
                                 ('/blog/.json', JsonPostHandler),
-                                ('/blog/(\d+).json', PostJsonHandler)],
+                                ('/blog/(\d+).json', PostJsonHandler),
+                                ('/blog/flush', FlushCacheHandler)],
                                 debug=True)

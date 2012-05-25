@@ -1,65 +1,60 @@
-from HomeWork4.login import empty_cookie
+from HomeWork4.cookies import CookieManager
 
 __author__ = 'Tomi'
 
 import re
 from templateHandler import TemplateHandler
 from HomeWork4.userModel import User
-from HomeWork4.hashes import HashManager
-from google.appengine.ext import db
 
 USER_RE = re.compile(r'^[a-zA-Z0-9_-]{3,20}$')
 PASSWORD_RE = re.compile('^.{3,20}$')
 EMAIL_RE = re.compile('^[\S]+@[\S]+\.[\S]+$')
-
-hashManager = HashManager()
 
 class SignUpHandler(TemplateHandler):
     def get(self):
         self.render("signUp.html")
 
     def post(self):
-        username = self.request.get('username')
-        password = self.request.get('password')
-        verify = self.request.get('verify')
-        email = self.request.get('email')
+        have_error = False
+        self.username = self.request.get('username')
+        self.password = self.request.get('password')
+        self.verify = self.request.get('verify')
+        self.email = self.request.get('email')
 
-        user = db.GqlQuery("SELECT * FROM User WHERE name = :username", username=username)
+        params = dict(username = self.username,
+            email = self.email)
 
-        err_user = ""
-        if user.count() > 0:
-            err_user = "User already exists"
-            self.render("signUp.html", username = username, email = email, err_user = err_user, err_passw1 = "",
-                err_passw2 = "", err_email = "")
-            return
+        if not valid_username(self.username):
+            params['error_username'] = "That's not a valid username."
+            have_error = True
+
+        if not valid_password(self.password):
+            params['error_password'] = "That wasn't a valid password."
+            have_error = True
+        elif self.password != self.verify:
+            params['error_verify'] = "Your passwords didn't match."
+            have_error = True
+
+        if self.email and not valid_email(self.email):
+            params['error_email'] = "That's not a valid email."
+            have_error = True
+
+        if have_error:
+            self.render('signUp.html', **params)
         else:
-            if not USER_RE.match(username):
-                err_user = "That's not a valid username."
-
-            err_passw1 = ""
-            err_passw2 = ""
-            if len(password)==0 or not PASSWORD_RE.match(password):
-                err_passw1 = "Type a password"
-            elif password != verify:
-                err_passw2 = "Your passwords didn't match."
-
-            err_email = ""
-            if len(email) != 0 and not EMAIL_RE.match(email):
-                err_email = "That's not a valid email address"
-
-            if err_user or err_passw1 or err_passw2 or err_email:
-                self.render("signUp.html", username = username, email = email, err_user = err_user, err_passw1 = err_passw1,
-                    err_passw2 = err_passw2, err_email = err_email)
+            u = User.by_name(self.username)
+            if u:
+                msg = 'That user already exists.'
+                self.render('signUp.html', error_username = msg)
             else:
-                password_hash = hashManager.makePasswordHash(username, password)
-                if email:
-                    newUser = User(name = username, password_hash = password_hash, email = email)
+                if self.email:
+                    u = User.register(self.username, self.password, self.email)
                 else:
-                    newUser = User(name = username, password_hash = password_hash)
-                newUserKey = newUser.put()
-                newUserId = str(newUserKey.id())
-                self.response.headers.add_header('Set-Cookie', 'user_id=%s; Path=/' % hashManager.makeStringHash(newUserId))
-                self.redirect("/blog/welcome")
+                    u = User.register(self.username, self.password)
+                u.put()
+
+                CookieManager.set_secure_cookie('user_id', str(u.key().id()), self.response)
+                self.redirect('/blog/welcome?username=' + self.username)
 
 def valid_username(username):
     return USER_RE.match(username)
@@ -72,11 +67,9 @@ def valid_password(password):
 
 class WelcomeHandler(TemplateHandler):
     def get(self):
-        idHash = self.request.cookies.get("user_id")
-        if empty_cookie(idHash) and hashManager.validStringHash(idHash):
-            validId = int(idHash.split('|')[0])
-            username = (User.get_by_id(validId))
-            self.render("welcome.html", username= str(username.name))
+        username = self.request.get('username')
+        if valid_username(username):
+            self.render('welcome.html', username = username)
         else:
-            self.redirect("/blog/login")
+            self.redirect('/blog/signup')
 
