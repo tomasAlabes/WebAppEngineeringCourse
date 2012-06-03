@@ -1,4 +1,6 @@
+import cgi
 from loginout.cookies import CookieManager
+from models.history import History
 from models.user import User
 from models.wiki_page import Wiki
 from templateHandler import TemplateHandler
@@ -25,5 +27,9 @@ class EditPageHandler(TemplateHandler):
             newWiki.put()
         else:
             wiki.content = wiki_content
+            wiki.put()
+
+        newHistory = History(title = wiki_title, content = cgi.escape(wiki_content))
+        newHistory.put()
 
         self.redirect('/'+wiki_title)
