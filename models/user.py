@@ -1,5 +1,5 @@
-from HomeWork4.hashes import HashManager
 from google.appengine.ext import db
+from loginout.hashes import HashManager
 
 class User(db.Model):
     name = db.StringProperty(required= True)

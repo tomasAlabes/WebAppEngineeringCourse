@@ -1,10 +1,7 @@
-from HomeWork4.cookies import CookieManager
-
-__author__ = 'Tomi'
-
-import re
+from loginout.cookies import CookieManager
 from templateHandler import TemplateHandler
-from HomeWork4.userModel import User
+from models.user import User
+import re
 
 USER_RE = re.compile(r'^[a-zA-Z0-9_-]{3,20}$')
 PASSWORD_RE = re.compile('^.{3,20}$')
@@ -54,7 +51,7 @@ class SignUpHandler(TemplateHandler):
                 u.put()
 
                 CookieManager.set_secure_cookie('user_id', str(u.key().id()), self.response)
-                self.redirect('/blog/welcome?username=' + self.username)
+                self.redirect('/?username=' + self.username)
 
 def valid_username(username):
     return USER_RE.match(username)
@@ -71,5 +68,5 @@ class WelcomeHandler(TemplateHandler):
         if valid_username(username):
             self.render('welcome.html', username = username)
         else:
-            self.redirect('/blog/signup')
+            self.render('welcome.html')
 

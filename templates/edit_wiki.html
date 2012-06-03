@@ -1,0 +1,19 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title> {{title}} </title>
+</head>
+<body>
+
+<span>{{username}}<a class="userLogout-link" href="/logout">(logout)</a> </span>
+
+<h2>{{title}}</h2>
+
+<form id="editWikiForm" method="post" action="/_edit/{{title}}">
+    <textarea name="content" rows="30" cols="100">{{content}}</textarea>
+    <button type="submit">Submit</button>
+</form>
+
+</body>
+</html>
